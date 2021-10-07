@@ -1,0 +1,23 @@
+{
+    "name": "@captaincool/locale-key-generator",
+    "version": "0.0.1",
+    "description": "",
+    "main": "index.js",
+    "bin": {
+        "build-locale-keys": "bin/build.js",
+        "lint-locale-keys": "bin/lint.js"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/captainCoolMJ/locale-key-generator.git"
+    },
+    "bugs": {
+        "url": "https://github.com/captainCoolMJ/locale-key-generator/issues"
+    },
+    "homepage": "https://github.com/captainCoolMJ/locale-key-generator#readme"
+}

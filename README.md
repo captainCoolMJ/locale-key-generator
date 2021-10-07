@@ -1,0 +1,7 @@
+- \*Default messages should not have a lang code specified
+- Messages nested inside directories will have their keys built based on their context structure
+- \*Translated files should have a full 4 char lang code applied before the file extension, even if the region is not exact
+- Keys for locale + region will take priority over "default" values
+- Translated files should not contain keys which are not present in its 'default' version
+- Contexts should use snake_case and should be namespaced with a ':'
+- If any of the above rules are violated, the build should fail
