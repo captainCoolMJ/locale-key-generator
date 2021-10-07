@@ -27,12 +27,8 @@ const getMatchingFiles = (startDir, ret = [], fileMatcher) => {
 
 module.exports = {
   getMatchingFiles,
-  extractLocaleContent: (
-    files,
-    startPath,
-    { nameMatchExp, localeRegionExp, contextDelimiterKeys }
-  ) => {
-    const withContext = files.map((file) => ({
+  extractContexts: (files, startPath, localeRegionExp) => {
+    return files.map((file) => ({
       ...file,
       contexts: file.path
         .split(path.resolve(startPath))[1]
@@ -40,9 +36,13 @@ module.exports = {
         .split("/")
         .slice(1),
     }));
-
+  },
+  extractLocaleContent: (
+    filesWithContexts,
+    { nameMatchExp, localeRegionExp, contextDelimiterKeys }
+  ) => {
     const contexts = {};
-    withContext.forEach((file) => {
+    filesWithContexts.forEach((file) => {
       const lang =
         file.path.match(
           new RegExp(`${nameMatchExp}\.(${localeRegionExp})\.json$`)

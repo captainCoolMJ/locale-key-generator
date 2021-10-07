@@ -8,6 +8,7 @@ if (cmdMap[argv._]) {
   cmdMap[argv._]({
     inputPath: argv.i,
     outputPath: argv.o,
+    contexts: argv.contexts,
   });
 } else {
   throw new Error("Invalid command supplied");

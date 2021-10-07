@@ -4,6 +4,7 @@ const {
   getMatchingFiles,
   extractLocaleContent,
   mergeLocaleGroups,
+  extractContexts,
 } = require("./src/utils");
 
 module.exports = {
@@ -18,6 +19,8 @@ module.exports = {
       ...opts,
     };
 
+    const whitelistedContexts = opts.contexts?.split(",");
+
     const matchExp = new RegExp(
       `^${opts.nameMatchExp}(\.${opts.localeRegionExp})?(\.json)?$`
     );
@@ -27,11 +30,25 @@ module.exports = {
       [],
       matchExp
     );
-    const localeData = extractLocaleContent(localeFiles, opts.inputPath, {
+
+    const filesWithContexts = extractContexts(
+      localeFiles,
+      opts.inputPath,
+      opts.localeRegionExp
+    ).filter((file) => {
+      if (whitelistedContexts) {
+        const context = file.contexts.join(opts.contextDelimiterKeys);
+        return whitelistedContexts.some((ctx) => context.startsWith(ctx));
+      }
+      return true;
+    });
+
+    const localeData = extractLocaleContent(filesWithContexts, {
       contextDelimiterKeys: opts.contextDelimiterKeys,
       nameMatchExp: opts.nameMatchExp,
       localeRegionExp: opts.localeRegionExp,
     });
+
     const merged = mergeLocaleGroups(localeData);
 
     if (!fs.existsSync(path.resolve(opts.outputPath))) {
