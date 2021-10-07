@@ -1,24 +1,19 @@
 const path = require("path");
 const fs = require("fs");
-const {
-  NAME_MATCH_EXP,
-  LOCALE_REGION_EXP,
-  FILE_TYPE_EXP,
-} = require("./constants");
 
 const readJSONFile = (path) =>
   JSON.parse(fs.readFileSync(path, { encoding: "utf-8" }));
 
-const getMatchingFiles = (startDir, ret = [], matchExp) => {
+const getMatchingFiles = (startDir, ret = [], fileMatcher) => {
   fs.readdirSync(startDir).forEach((file) => {
-    if (!file.match(matchExp)) {
+    if (!file.match(fileMatcher)) {
       return;
     }
 
     const fileName = path.join(startDir, file);
 
     if (fs.lstatSync(fileName).isDirectory()) {
-      getMatchingFiles(fileName, ret, matchExp);
+      getMatchingFiles(fileName, ret, fileMatcher);
     } else {
       ret.push({
         path: fileName,
@@ -32,12 +27,16 @@ const getMatchingFiles = (startDir, ret = [], matchExp) => {
 
 module.exports = {
   getMatchingFiles,
-  extractLocaleContent: (files, startPath, matchExp) => {
+  extractLocaleContent: (
+    files,
+    startPath,
+    { nameMatchExp, localeRegionExp, contextDelimiterKeys }
+  ) => {
     const withContext = files.map((file) => ({
       ...file,
       contexts: file.path
         .split(path.resolve(startPath))[1]
-        .split(new RegExp(`.${LOCALE_REGION_EXP}|${FILE_TYPE_EXP}`))[0]
+        .split(new RegExp(`.${localeRegionExp}|\.json`))[0]
         .split("/")
         .slice(1),
     }));
@@ -46,24 +45,26 @@ module.exports = {
     withContext.forEach((file) => {
       const lang =
         file.path.match(
-          new RegExp(
-            `${NAME_MATCH_EXP}\.(${LOCALE_REGION_EXP})${FILE_TYPE_EXP}$`
-          )
+          new RegExp(`${nameMatchExp}\.(${localeRegionExp})\.json$`)
         )?.[1] || "default";
 
       file.contexts.forEach((context, i) => {
-        const key = file.contexts.slice(0, i + 1).join(":") || "default";
+        const key =
+          file.contexts.slice(0, i + 1).join(contextDelimiterKeys) || "default";
         contexts[key] = contexts[key] || {};
         contexts[key][lang] = {
           ...contexts[key][lang],
           ...Object.entries(file.contents).reduce((acc, [messageId, value]) => {
-            acc[`${file.contexts.join(":")}:${messageId}`] = value;
+            acc[
+              `${file.contexts.join(
+                contextDelimiterKeys
+              )}${contextDelimiterKeys}${messageId}`
+            ] = value;
             return acc;
           }, {}),
         };
       });
     });
-
     return contexts;
   },
   mergeLocaleGroups: (localeData) =>

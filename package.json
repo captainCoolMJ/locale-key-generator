@@ -4,8 +4,7 @@
     "description": "",
     "main": "index.js",
     "bin": {
-        "build-locale-keys": "bin/build.js",
-        "lint-locale-keys": "bin/lint.js"
+        "locale-keys": "bin/index.js"
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -19,5 +18,8 @@
     "bugs": {
         "url": "https://github.com/captainCoolMJ/locale-key-generator/issues"
     },
-    "homepage": "https://github.com/captainCoolMJ/locale-key-generator#readme"
+    "homepage": "https://github.com/captainCoolMJ/locale-key-generator#readme",
+    "dependencies": {
+        "minimist": "^1.2.5"
+    }
 }

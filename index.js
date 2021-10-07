@@ -7,19 +7,44 @@ const {
 } = require("./src/utils");
 
 module.exports = {
-  build: (startPath, outputPath, matchExp) => {
-    const localeFiles = getMatchingFiles(path.resolve(startPath), [], matchExp);
-    const localeData = extractLocaleContent(localeFiles, startPath);
+  build: (opts = {}) => {
+    opts = {
+      inputPath: "./",
+      outputPath: "./output",
+      contextDelimiterKeys: ":",
+      contextDelimiterFiles: "__",
+      nameMatchExp: "[\\w]+",
+      localeRegionExp: "[a-z]{2}_[A-Z]{2}",
+      ...opts,
+    };
+
+    const matchExp = new RegExp(
+      `^${opts.nameMatchExp}(\.${opts.localeRegionExp})?(\.json)?$`
+    );
+
+    const localeFiles = getMatchingFiles(
+      path.resolve(opts.inputPath),
+      [],
+      matchExp
+    );
+    const localeData = extractLocaleContent(localeFiles, opts.inputPath, {
+      contextDelimiterKeys: opts.contextDelimiterKeys,
+      nameMatchExp: opts.nameMatchExp,
+      localeRegionExp: opts.localeRegionExp,
+    });
     const merged = mergeLocaleGroups(localeData);
 
-    if (!fs.existsSync(path.resolve(outputPath))) {
-      fs.mkdirSync(path.resolve(outputPath), { recursive: true });
+    if (!fs.existsSync(path.resolve(opts.outputPath))) {
+      fs.mkdirSync(path.resolve(opts.outputPath), { recursive: true });
     }
 
     Object.entries(merged).forEach(([contextGroup, localeData]) => {
       const outputFilePath = path.resolve(
-        outputPath,
-        contextGroup.replace(/:/g, "__")
+        opts.outputPath,
+        contextGroup.replace(
+          new RegExp(`\\${opts.contextDelimiterKeys}`, "g"),
+          opts.contextDelimiterFiles
+        )
       );
 
       Object.entries(localeData).forEach(([locale, contents]) => {
@@ -33,7 +58,21 @@ module.exports = {
       });
     });
   },
-  lint: (startPath, outputPath, matchExp) => {
+  lint: (opts = {}) => {
+    opts = {
+      inputPath: "./",
+      outputPath: "./output",
+      contextDelimiterKeys: ":",
+      contextDelimiterFiles: "__",
+      nameMatchExp: "[\\w]+",
+      localeRegionExp: "[a-z]{2}_[A-Z]{2}",
+      ...opts,
+    };
+
+    const matchExp = new RegExp(
+      `^${opts.nameMatchExp}(\.${opts.localeRegionExp})?(\.json)?$`
+    );
+
     console.log("TODO: Provide warnings if duplicate keys are encountered");
     console.log("TODO: Provide warnings if invalid file names are encountered");
     console.log("TODO: Provide warnings if file names do not use snake case");
