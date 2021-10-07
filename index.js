@@ -74,6 +74,9 @@ module.exports = {
     );
 
     console.log("TODO: Provide warnings if duplicate keys are encountered");
+    console.log(
+      "TODO: Provide warnings if keys are not in ICU message format structure"
+    );
     console.log("TODO: Provide warnings if invalid file names are encountered");
     console.log("TODO: Provide warnings if file names do not use snake case");
     console.log("TODO: Provide warnings if keys do not use snake case");
