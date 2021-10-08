@@ -1,0 +1,9 @@
+{
+    "inputPath": "./",
+    "outputPath": "./output",
+    "contextDelimiterKeys": ":",
+    "contextDelimiterFiles": "__",
+    "nameMatchExp": "[\\w]+",
+    "localeRegionExp": "[a-z]{2}_[A-Z]{2}",
+    "nameCasing": "snake"
+}

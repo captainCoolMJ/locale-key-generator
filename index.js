@@ -6,18 +6,11 @@ const {
   mergeLocaleGroups,
   extractContexts,
 } = require("./src/utils");
+const defaultConfig = require("./config.json");
 
 module.exports = {
   build: (opts = {}) => {
-    opts = {
-      inputPath: "./",
-      outputPath: "./output",
-      contextDelimiterKeys: ":",
-      contextDelimiterFiles: "__",
-      nameMatchExp: "[\\w]+",
-      localeRegionExp: "[a-z]{2}_[A-Z]{2}",
-      ...opts,
-    };
+    opts = { ...defaultConfig, ...opts };
 
     const whitelistedContexts = opts.contexts?.split(",");
 
@@ -76,15 +69,7 @@ module.exports = {
     });
   },
   lint: (opts = {}) => {
-    opts = {
-      inputPath: "./",
-      outputPath: "./output",
-      contextDelimiterKeys: ":",
-      contextDelimiterFiles: "__",
-      nameMatchExp: "[\\w]+",
-      localeRegionExp: "[a-z]{2}_[A-Z]{2}",
-      ...opts,
-    };
+    opts = { ...defaultConfig, ...opts };
 
     const matchExp = new RegExp(
       `^${opts.nameMatchExp}(\.${opts.localeRegionExp})?(\.json)?$`
