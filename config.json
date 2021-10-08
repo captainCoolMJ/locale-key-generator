@@ -1,4 +1,5 @@
 {
+    "defaultLocale": "en_US",
     "inputPath": "./",
     "outputPath": "./output",
     "contextDelimiterKeys": ":",

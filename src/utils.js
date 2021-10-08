@@ -27,30 +27,29 @@ const getMatchingFiles = (startDir, ret = [], fileMatcher) => {
 
 module.exports = {
   getMatchingFiles,
-  extractContexts: (files, startPath, localeRegionExp) => {
-    return files.map((file) => ({
+  extractContexts: (files, startPath, localeRegionExp) =>
+    files.map((file) => ({
       ...file,
       contexts: file.path
         .split(path.resolve(startPath))[1]
         .split(new RegExp(`.${localeRegionExp}|\.json`))[0]
         .split("/")
         .slice(1),
-    }));
-  },
+    })),
   extractLocaleContent: (
     filesWithContexts,
-    { nameMatchExp, localeRegionExp, contextDelimiterKeys }
-  ) => {
-    const contexts = {};
-    filesWithContexts.forEach((file) => {
+    { nameMatchExp, localeRegionExp, contextDelimiterKeys, defaultLocale }
+  ) =>
+    filesWithContexts.reduce((contexts, file) => {
       const lang =
         file.path.match(
           new RegExp(`${nameMatchExp}\.(${localeRegionExp})\.json$`)
-        )?.[1] || "default";
+        )?.[1] || defaultLocale;
 
       file.contexts.forEach((context, i) => {
         const key =
-          file.contexts.slice(0, i + 1).join(contextDelimiterKeys) || "default";
+          file.contexts.slice(0, i + 1).join(contextDelimiterKeys) ||
+          defaultLocale;
         contexts[key] = contexts[key] || {};
         contexts[key][lang] = {
           ...contexts[key][lang],
@@ -64,19 +63,15 @@ module.exports = {
           }, {}),
         };
       });
-    });
-    return contexts;
-  },
-  mergeLocaleGroups: (localeData) =>
-    Object.entries(localeData).reduce((acc, [key, availableLocales]) => {
-      const { default: base, ...languages } = availableLocales;
-
+      return contexts;
+    }, {}),
+  mergeLocaleGroups: (localeData, defaultLocale) =>
+    Object.entries(localeData).reduce((acc, [key, locales]) => {
       acc[key] = acc[key] || {};
-      acc[key].default = base;
 
-      Object.entries(languages).forEach(([langCode, contents]) => {
+      Object.entries(locales).forEach(([langCode, contents]) => {
         acc[key][langCode] = {
-          ...base,
+          ...locales[defaultLocale],
           ...contents,
         };
       });

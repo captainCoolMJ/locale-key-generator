@@ -40,9 +40,10 @@ module.exports = {
       contextDelimiterKeys: opts.contextDelimiterKeys,
       nameMatchExp: opts.nameMatchExp,
       localeRegionExp: opts.localeRegionExp,
+      defaultLocale: opts.defaultLocale,
     });
 
-    const merged = mergeLocaleGroups(localeData);
+    const merged = mergeLocaleGroups(localeData, opts.defaultLocale);
 
     if (!fs.existsSync(path.resolve(opts.outputPath))) {
       fs.mkdirSync(path.resolve(opts.outputPath), { recursive: true });
@@ -58,13 +59,12 @@ module.exports = {
       );
 
       Object.entries(localeData).forEach(([locale, contents]) => {
-        let path = outputFilePath;
-        if (locale !== "default") {
-          path += `.${locale}`;
-        }
-        path += ".json";
+        let path = `${outputFilePath}.${locale}.json`;
 
-        fs.writeFileSync(path, JSON.stringify(contents, null, "\t"));
+        console.log("writing", path);
+        if (!opts.dryRun) {
+          fs.writeFileSync(path, JSON.stringify(contents, null, "\t"));
+        }
       });
     });
   },
