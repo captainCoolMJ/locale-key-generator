@@ -1,11 +1,11 @@
 #! /usr/bin/env node
-const { build, lint } = require("..");
+const { export: build, lint } = require("..");
 const path = require("path");
 const fs = require("fs");
 const logger = require("../src/logger");
 const argv = require("minimist")(process.argv.slice(2));
 
-const cmdMap = { build, lint };
+const cmdMap = { export: build, lint };
 
 const argMap = {
   i: "inputPath",

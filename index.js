@@ -2,12 +2,16 @@ const path = require("path");
 const fs = require("fs");
 const defaultConfig = require("./config.json");
 const logger = require("./src/logger");
-const prepareLocaleData = require("./src/prepare-locale-data");
+const getLocalizedContexts = require("./src/get-localized-contexts");
 const getLocaleFiles = require("./src/get-locale-files");
-const { traverse } = require("./src/utils");
+const {
+  traverse,
+  mapContextToFile,
+  writeLocalesToFile,
+} = require("./src/utils");
 
-const getLocaleData = (opts, logger) =>
-  prepareLocaleData(
+const buildContextsFromFs = (opts, logger) =>
+  getLocalizedContexts(
     getLocaleFiles(
       traverse(opts.inputPath)(path.resolve(opts.inputPath)),
       opts,
@@ -23,37 +27,21 @@ const getLocaleData = (opts, logger) =>
   );
 
 module.exports = {
-  build: (opts = {}) => {
+  export: (opts = {}) => {
     opts = { ...defaultConfig, ...opts };
 
     if (!opts.dryRun && !fs.existsSync(path.resolve(opts.outputPath))) {
       fs.mkdirSync(path.resolve(opts.outputPath), { recursive: true });
     }
 
-    Object.entries(getLocaleData(opts, logger)).forEach(
-      ([contextGroup, localeData]) => {
-        const outputFilePath = path.resolve(
-          opts.outputPath,
-          contextGroup.replace(
-            new RegExp(`\\${opts.contextDelimiterKeys}`, "g"),
-            opts.contextDelimiterFiles
-          )
-        );
-
-        Object.entries(localeData).forEach(([locale, contents]) => {
-          const path = `${outputFilePath}.${locale}.json`;
-          if (!opts.dryRun) {
-            fs.writeFileSync(path, JSON.stringify(contents, null, "\t"));
-          }
-          logger.info("Wrote", path);
-        });
-      }
-    );
+    buildContextsFromFs(opts, logger)
+      .map(mapContextToFile(opts))
+      .forEach(writeLocalesToFile(logger, opts.dryRun));
   },
   lint: (opts = {}) => {
     opts = { ...defaultConfig, ...opts };
 
-    getLocaleData(opts, logger);
+    buildContextsFromFs(opts, logger);
 
     if (logger.getWarnCount() > 0) {
       throw new Error("There was a problem. See log above for details");
