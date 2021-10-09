@@ -13,7 +13,7 @@ npm install -g @captaincool/locale-key-generator
 By default, keys will be exported based on the contents of `config.json`. To use a custom configuration, supply its path using the `--config` argument during execution
 
 ```bash
-locale-keys build -i ./content -o ./output --config=custom-config.json
+locale-keys export -i ./content -o ./output --config=custom-config.json
 ```
 
 ## Usage
