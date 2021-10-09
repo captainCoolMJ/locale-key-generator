@@ -6,7 +6,7 @@ class Logger {
     console.info(...args);
   }
   error(...args) {
-    console.log("\x1b[31m", ...args, "\x1b[0m");
+    console.error("\x1b[31m", ...args, "\x1b[0m");
   }
   success(...args) {
     console.log("\x1b[32m", ...args, "\x1b[0m");

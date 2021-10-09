@@ -1,16 +1,13 @@
-const path = require("path");
 const {
-  traverse,
-  mapFileData,
   filterBlacklist,
   filterWhitelistedContexts,
   filterMatchingFiles,
-  mapJSONData,
+  mapContextData,
 } = require("./utils");
 
-module.exports = (opts, logger) =>
-  traverse(path.resolve(opts.inputPath))
-    .map(mapFileData(opts.inputPath))
+module.exports = (filesList, opts, logger) =>
+  filesList
+    .map(mapContextData(opts.contextDelimiterKeys))
     .filter(filterBlacklist(opts.ignoreFiles))
     .filter(
       filterWhitelistedContexts(
@@ -23,5 +20,4 @@ module.exports = (opts, logger) =>
         logger,
         new RegExp(`^${opts.keyMatchExp}(\.${opts.localeRegionExp})?(\.json)?$`)
       )
-    )
-    .map(mapJSONData);
+    );

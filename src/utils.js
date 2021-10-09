@@ -1,39 +1,32 @@
 const path = require("path");
 const fs = require("fs");
 
-const traverse = (startDir, ret = []) => {
-  fs.readdirSync(startDir).forEach((file) => {
-    const fullPath = path.resolve(".", startDir, file);
-    if (fs.lstatSync(fullPath).isDirectory()) {
-      traverse(fullPath, ret);
-    } else {
-      ret.push(fullPath);
-    }
-  });
-  return ret;
-};
-
 module.exports = {
-  traverse,
-  mapJSONData: (file) => ({
-    ...file,
-    content: JSON.parse(fs.readFileSync(file.filePath, { encoding: "utf-8" })),
-  }),
+  traverse: (basePath) => {
+    const traverse = (startDir, ret = []) => {
+      fs.readdirSync(startDir).forEach((file) => {
+        const fullPath = path.resolve(".", startDir, file);
+        if (fs.lstatSync(fullPath).isDirectory()) {
+          traverse(fullPath, ret);
+        } else {
+          ret.push({
+            path: fullPath,
+            parts: fullPath
+              .split(path.resolve(".", basePath))[1]
+              .split("/")
+              .slice(1),
+            file: file,
+          });
+        }
+      });
+      return ret;
+    };
+    return traverse;
+  },
   filterBlacklist:
     (blacklist) =>
     ({ file }) =>
       !blacklist.includes(file),
-  filterWhitelistedContexts:
-    (whitelist, delimiter) =>
-    ({ parts }) => {
-      if (whitelist) {
-        const keyPrefix = parts.join(delimiter);
-        return whitelist.some((ctx) =>
-          keyPrefix.startsWith(`${ctx}${delimiter}`)
-        );
-      }
-      return true;
-    },
   filterMatchingFiles:
     (logger, matcher) =>
     ({ parts }) => {
@@ -43,38 +36,38 @@ module.exports = {
       }
       return true;
     },
-  mapFileData: (basePath) => (filePath) => {
-    const parts = filePath
-      .split(path.resolve(".", basePath))[1]
-      .split("/")
-      .slice(1);
+  mapContextData: (delimiter) => (file) => {
+    const parts = file.parts.map((part) => part.split(".")[0]);
     return {
-      filePath,
-      parts,
-      file: parts[parts.length - 1],
-      fileName: parts[parts.length - 1].split(".")[0],
+      ...file,
+      contexts: parts,
+      key: parts.join(delimiter),
     };
   },
+  filterWhitelistedContexts:
+    (whitelist, delimiter) =>
+    ({ key }) =>
+      whitelist
+        ? whitelist.some(
+            (ctx) => key === ctx || key.startsWith(`${ctx}${delimiter}`)
+          )
+        : true,
   dropInvalidKeys: (logger, matcher) => (file) => ({
     ...file,
     content: Object.entries(file.content).reduce((content, [key, value]) => {
       if (!matcher.test(key)) {
-        logger.warn(`Invalid Message Key: ${key} found in ${file.filePath}`);
+        logger.warn(`Invalid Message Key: ${key} found in ${file.path}`);
         return content;
       }
       content[key] = value;
       return content;
     }, {}),
   }),
-  prefixContentKeys: (delimiter) => (file) => {
-    const { parts } = file;
-    const keyPrefix = parts.map((part) => part.split(".")[0]).join(delimiter);
-    return {
-      ...file,
-      content: Object.entries(file.content).reduce((prefixed, [key, value]) => {
-        prefixed[`${keyPrefix}${delimiter}${key}`] = value;
-        return prefixed;
-      }, {}),
-    };
-  },
+  prefixContentKeys: (delimiter) => (file) => ({
+    ...file,
+    content: Object.entries(file.content).reduce((prefixed, [key, value]) => {
+      prefixed[`${file.key}${delimiter}${key}`] = value;
+      return prefixed;
+    }, {}),
+  }),
 };

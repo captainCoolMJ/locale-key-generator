@@ -11,8 +11,8 @@ module.exports = (fileData, opts, logger) => {
         opts.defaultLocale;
 
       parts.forEach((part, i) => {
-        const key = parts
-          .map((part) => part.split(".")[0])
+        const key = fileData.key
+          .split(opts.contextDelimiterKeys)
           .slice(0, i + 1)
           .join(opts.contextDelimiterKeys);
         contexts[key] = contexts[key] || {};
