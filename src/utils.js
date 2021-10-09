@@ -1,81 +1,80 @@
 const path = require("path");
 const fs = require("fs");
 
-const readJSONFile = (path) =>
-  JSON.parse(fs.readFileSync(path, { encoding: "utf-8" }));
-
-const getMatchingFiles = (startDir, ret = [], fileMatcher) => {
+const traverse = (startDir, ret = []) => {
   fs.readdirSync(startDir).forEach((file) => {
-    if (!file.match(fileMatcher)) {
-      return;
-    }
-
-    const fileName = path.join(startDir, file);
-
-    if (fs.lstatSync(fileName).isDirectory()) {
-      getMatchingFiles(fileName, ret, fileMatcher);
+    const fullPath = path.resolve(".", startDir, file);
+    if (fs.lstatSync(fullPath).isDirectory()) {
+      traverse(fullPath, ret);
     } else {
-      ret.push({
-        path: fileName,
-        contents: readJSONFile(fileName),
-      });
+      ret.push(fullPath);
     }
   });
-
   return ret;
 };
 
 module.exports = {
-  getMatchingFiles,
-  extractContexts: (files, startPath, localeRegionExp) =>
-    files.map((file) => ({
+  traverse,
+  mapJSONData: (file) => ({
+    ...file,
+    content: JSON.parse(fs.readFileSync(file.filePath, { encoding: "utf-8" })),
+  }),
+  filterBlacklist:
+    (blacklist) =>
+    ({ file }) =>
+      !blacklist.includes(file),
+  filterWhitelistedContexts:
+    (whitelist, delimiter) =>
+    ({ parts }) => {
+      if (whitelist) {
+        const keyPrefix = parts.join(delimiter);
+        return whitelist.some((ctx) =>
+          keyPrefix.startsWith(`${ctx}${delimiter}`)
+        );
+      }
+      return true;
+    },
+  filterMatchingFiles:
+    (logger, matcher) =>
+    ({ parts }) => {
+      if (parts.some((part) => !matcher.test(part))) {
+        logger.warn(`Invalid Name: "${parts.join("/")}" is not valid"`);
+        return false;
+      }
+      return true;
+    },
+  mapFileData: (basePath) => (filePath) => {
+    const parts = filePath
+      .split(path.resolve(".", basePath))[1]
+      .split("/")
+      .slice(1);
+    return {
+      filePath,
+      parts,
+      file: parts[parts.length - 1],
+      fileName: parts[parts.length - 1].split(".")[0],
+    };
+  },
+  dropInvalidKeys: (logger, matcher) => (file) => ({
+    ...file,
+    content: Object.entries(file.content).reduce((content, [key, value]) => {
+      if (!matcher.test(key)) {
+        logger.warn(`Invalid Message Key: ${key} found in ${file.filePath}`);
+        return content;
+      }
+      content[key] = value;
+      return content;
+    }, {}),
+  }),
+  prefixContentKeys: (delimiter) => (file) => {
+    const { parts } = file;
+    const keyPrefix = parts.map((part) => part.split(".")[0]).join(delimiter);
+    return {
       ...file,
-      contexts: file.path
-        .split(path.resolve(startPath))[1]
-        .split(new RegExp(`.${localeRegionExp}|\.json`))[0]
-        .split("/")
-        .slice(1),
-    })),
-  extractLocaleContent: (
-    filesWithContexts,
-    { nameMatchExp, localeRegionExp, contextDelimiterKeys, defaultLocale }
-  ) =>
-    filesWithContexts.reduce((contexts, file) => {
-      const lang =
-        file.path.match(
-          new RegExp(`${nameMatchExp}\.(${localeRegionExp})\.json$`)
-        )?.[1] || defaultLocale;
-
-      file.contexts.forEach((context, i) => {
-        const key =
-          file.contexts.slice(0, i + 1).join(contextDelimiterKeys) ||
-          defaultLocale;
-        contexts[key] = contexts[key] || {};
-        contexts[key][lang] = {
-          ...contexts[key][lang],
-          ...Object.entries(file.contents).reduce((acc, [messageId, value]) => {
-            acc[
-              `${file.contexts.join(
-                contextDelimiterKeys
-              )}${contextDelimiterKeys}${messageId}`
-            ] = value;
-            return acc;
-          }, {}),
-        };
-      });
-      return contexts;
-    }, {}),
-  mergeLocaleGroups: (localeData, defaultLocale) =>
-    Object.entries(localeData).reduce((acc, [key, locales]) => {
-      acc[key] = acc[key] || {};
-
-      Object.entries(locales).forEach(([langCode, contents]) => {
-        acc[key][langCode] = {
-          ...locales[defaultLocale],
-          ...contents,
-        };
-      });
-
-      return acc;
-    }, {}),
+      content: Object.entries(file.content).reduce((prefixed, [key, value]) => {
+        prefixed[`${keyPrefix}${delimiter}${key}`] = value;
+        return prefixed;
+      }, {}),
+    };
+  },
 };

@@ -1,55 +1,21 @@
 const path = require("path");
 const fs = require("fs");
-const {
-  getMatchingFiles,
-  extractLocaleContent,
-  mergeLocaleGroups,
-  extractContexts,
-} = require("./src/utils");
 const defaultConfig = require("./config.json");
+const logger = require("./src/logger");
+const prepareLocaleData = require("./src/prepare-locale-data");
+const getLocaleFiles = require("./src/get-locale-files");
 
 module.exports = {
   build: (opts = {}) => {
     opts = { ...defaultConfig, ...opts };
 
-    const whitelistedContexts = opts.contexts?.split(",");
-
-    const matchExp = new RegExp(
-      `^${opts.nameMatchExp}(\.${opts.localeRegionExp})?(\.json)?$`
-    );
-
-    const localeFiles = getMatchingFiles(
-      path.resolve(opts.inputPath),
-      [],
-      matchExp
-    );
-
-    const filesWithContexts = extractContexts(
-      localeFiles,
-      opts.inputPath,
-      opts.localeRegionExp
-    ).filter((file) => {
-      if (whitelistedContexts) {
-        const context = file.contexts.join(opts.contextDelimiterKeys);
-        return whitelistedContexts.some((ctx) => context.startsWith(ctx));
-      }
-      return true;
-    });
-
-    const localeData = extractLocaleContent(filesWithContexts, {
-      contextDelimiterKeys: opts.contextDelimiterKeys,
-      nameMatchExp: opts.nameMatchExp,
-      localeRegionExp: opts.localeRegionExp,
-      defaultLocale: opts.defaultLocale,
-    });
-
-    const merged = mergeLocaleGroups(localeData, opts.defaultLocale);
-
-    if (!fs.existsSync(path.resolve(opts.outputPath))) {
+    if (!opts.dryRun && !fs.existsSync(path.resolve(opts.outputPath))) {
       fs.mkdirSync(path.resolve(opts.outputPath), { recursive: true });
     }
 
-    Object.entries(merged).forEach(([contextGroup, localeData]) => {
+    Object.entries(
+      prepareLocaleData(getLocaleFiles(opts, logger), opts, logger)
+    ).forEach(([contextGroup, localeData]) => {
       const outputFilePath = path.resolve(
         opts.outputPath,
         contextGroup.replace(
@@ -59,9 +25,7 @@ module.exports = {
       );
 
       Object.entries(localeData).forEach(([locale, contents]) => {
-        let path = `${outputFilePath}.${locale}.json`;
-
-        console.log("writing", path);
+        const path = `${outputFilePath}.${locale}.json`;
         if (!opts.dryRun) {
           fs.writeFileSync(path, JSON.stringify(contents, null, "\t"));
         }
@@ -70,20 +34,15 @@ module.exports = {
   },
   lint: (opts = {}) => {
     opts = { ...defaultConfig, ...opts };
+    prepareLocaleData(getLocaleFiles(opts, logger), opts, logger);
+    if (logger.getWarnCount() > 0) {
+      throw new Error("There was a problem. See log above for details");
+    }
 
-    const matchExp = new RegExp(
-      `^${opts.nameMatchExp}(\.${opts.localeRegionExp})?(\.json)?$`
-    );
-
-    console.log("TODO: Provide warnings if duplicate keys are encountered");
     console.log(
       "TODO: Provide warnings if keys are not in ICU message format structure"
     );
-    console.log("TODO: Provide warnings if invalid file names are encountered");
-    console.log("TODO: Provide warnings if file names do not use snake case");
-    console.log("TODO: Provide warnings if keys do not use snake case");
-    console.log(
-      "TODO: Provide warnings if keys are detected in languages that do not exist in default files"
-    );
+
+    logger.success("Wow great job! You're good to go");
   },
 };
