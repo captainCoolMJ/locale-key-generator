@@ -35,7 +35,9 @@ module.exports = {
     }
 
     buildContextsFromFs(opts, logger)
-      .map(mapContextToFile(opts))
+      .map(
+        mapContextToFile(opts.contextDelimiterKeys, opts.contextDelimiterFiles)
+      )
       .map((file) => ({
         ...file,
         file: path.resolve(opts.outputPath, file.file),
