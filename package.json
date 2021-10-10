@@ -1,25 +1,35 @@
 {
-    "name": "@captaincool/locale-key-generator",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
-    "bin": {
-        "locale-keys": "bin/index.js"
-    },
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "",
-    "license": "ISC",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/captainCoolMJ/locale-key-generator.git"
-    },
-    "bugs": {
-        "url": "https://github.com/captainCoolMJ/locale-key-generator/issues"
-    },
-    "homepage": "https://github.com/captainCoolMJ/locale-key-generator#readme",
-    "dependencies": {
-        "minimist": "^1.2.5"
-    }
+  "name": "@captaincool/locale-key-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "locale-keys": "bin/index.js"
+  },
+  "scripts": {
+    "test": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/captainCoolMJ/locale-key-generator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/captainCoolMJ/locale-key-generator/issues"
+  },
+  "homepage": "https://github.com/captainCoolMJ/locale-key-generator#readme",
+  "dependencies": {
+    "minimist": "^1.2.5"
+  },
+  "devDependencies": {
+    "jest": "^27.2.5"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "**/src/**/*.js"
+    ]
+  }
 }

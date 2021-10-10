@@ -34,7 +34,7 @@ module.exports = {
     (logger, matcher) =>
     ({ parts }) => {
       if (parts.some((part) => !matcher.test(part))) {
-        logger.warn(`Invalid Name: "${parts.join("/")}" is not valid"`);
+        logger.warn(`Invalid Name: "${parts.join("/")}" is not valid`);
         return false;
       }
       return true;
@@ -90,7 +90,7 @@ module.exports = {
     ...file,
     content: Object.entries(file.content).reduce((content, [key, value]) => {
       if (!matcher.test(key)) {
-        logger.warn(`Invalid Message Key: ${key} found in ${file.path}`);
+        logger.warn(`Invalid Message Key: "${key}" found in ${file.path}`);
         return content;
       }
       content[key] = value;
@@ -98,7 +98,7 @@ module.exports = {
     }, {}),
   }),
   // Prefix keys with the context they belong to
-  prefixContentKeys: (delimiter) => (file) => ({
+  prefixContextKeys: (delimiter) => (file) => ({
     ...file,
     content: Object.entries(file.content).reduce((prefixed, [key, value]) => {
       prefixed[`${file.key}${delimiter}${key}`] = value;
@@ -107,15 +107,12 @@ module.exports = {
   }),
   // Map context and locale data to a file path
   mapContextToFile:
-    (opts) =>
+    (keyDelimiter, fileDelimiter) =>
     ([context, localeContents]) => ({
       localeContents: localeContents,
-      file: path.resolve(
-        opts.outputPath,
-        context.replace(
-          new RegExp(`\\${opts.contextDelimiterKeys}`, "g"),
-          opts.contextDelimiterFiles
-        )
+      file: context.replace(
+        new RegExp(`\\${keyDelimiter}`, "g"),
+        fileDelimiter
       ),
     }),
   // Write locale data to file
@@ -127,7 +124,7 @@ module.exports = {
         if (!dryRun) {
           fs.writeFileSync(path, JSON.stringify(localeContents, null, "\t"));
         }
-        logger.info(dryRun ? "Would have written" : "Wrote", path);
+        logger.info(`${dryRun ? "Would have written" : "Wrote"} "${path}"`);
       });
     },
 };

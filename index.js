@@ -36,6 +36,10 @@ module.exports = {
 
     buildContextsFromFs(opts, logger)
       .map(mapContextToFile(opts))
+      .map((file) => ({
+        ...file,
+        file: path.resolve(opts.outputPath, file.file),
+      }))
       .forEach(writeLocalesToFile(logger, opts.dryRun));
   },
   lint: (opts = {}) => {

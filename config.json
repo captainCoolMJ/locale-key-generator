@@ -1,13 +1,10 @@
 {
-    "defaultLocale": "en_US",
-    "inputPath": "./",
-    "outputPath": "./output",
-    "contextDelimiterKeys": ":",
-    "contextDelimiterFiles": "__",
-    "nameMatchExp": "[\\w]+",
-    "localeRegionExp": "[a-z]{2}_[A-Z]{2}",
-    "keyMatchExp": "[a-z_]+",
-    "ignoreFiles": [
-        ".DS_Store"
-    ]
+  "defaultLocale": "en_US",
+  "inputPath": "./",
+  "outputPath": "./output",
+  "contextDelimiterKeys": ":",
+  "contextDelimiterFiles": "__",
+  "localeRegionExp": "[a-z]{2}-[A-Z]{2}",
+  "keyMatchExp": "[a-z_]+",
+  "ignoreFiles": [".DS_Store"]
 }

@@ -1,6 +1,6 @@
 const {
   dropInvalidKeys,
-  prefixContentKeys,
+  prefixContextKeys,
   mapLocaleData,
   mergeContexts,
   mergeDefaultKeys,
@@ -9,7 +9,7 @@ const {
 module.exports = (fileData, opts, logger) => {
   const localeData = fileData
     .map(dropInvalidKeys(logger, new RegExp(`^${opts.keyMatchExp}$`)))
-    .map(prefixContentKeys(opts.contextDelimiterKeys))
+    .map(prefixContextKeys(opts.contextDelimiterKeys))
     .map(
       mapLocaleData(
         new RegExp(`\.(${opts.localeRegionExp})\.json$`),
