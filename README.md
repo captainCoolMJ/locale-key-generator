@@ -33,7 +33,7 @@ locale-keys lint -i ./content
 
 | Option                | Default               | Description                                                            |
 | --------------------- | --------------------- | ---------------------------------------------------------------------- |
-| defaultLocale         | en_US                 | Files without a locale suffixed in the name will default to this value |
+| defaultLocale         | en-US                 | Files without a locale suffixed in the name will default to this value |
 | contextDelimiterKeys  | :                     | How to specify contexts messages belong to                             |
 | contextDelimiterFiles | \_\_                  | How to specify contexts in the final output files                      |
 | localeRegionExp       | `/[a-z]{2}-[A-Z]{2}/` | The pattern to determine locale                                        |
