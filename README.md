@@ -23,7 +23,7 @@ locale-keys export -i ./content -o ./output --config=customConfig.json
 locale-keys export -i ./content -o ./output
 
 # generate locale files for a specific context
-locale-keys export -i ./content -o ./output --contexts=shared,web:coupon_banner
+locale-keys export -i ./content -o ./output --contexts=shared,web:feature
 
 # lint the contents of the 'content' directory
 locale-keys lint -i ./content
