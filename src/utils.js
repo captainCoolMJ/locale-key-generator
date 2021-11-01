@@ -40,8 +40,14 @@ module.exports = {
       return true;
     },
   // Attach context data
-  mapContextData: (delimiter) => (file) => {
+  mapContextData: (delimiter, reservedContextFilename) => (file) => {
     const parts = file.parts.map((part) => part.split(".")[0]);
+    if (
+      reservedContextFilename &&
+      parts[parts.length - 1] === reservedContextFilename
+    ) {
+      parts.splice(-1, 1);
+    }
     return {
       ...file,
       contexts: parts,

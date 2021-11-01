@@ -73,6 +73,16 @@ describe("utils", () => {
         })
       );
     });
+
+    it("should associate any files named the same as the reserved context with its parent directory", () => {
+      const map = mapContextData(":", "default");
+      expect(map(mockFile("/strings/feature/default.json"))).toEqual(
+        expect.objectContaining({
+          contexts: ["strings", "feature"],
+          key: "strings:feature",
+        })
+      );
+    });
   });
 
   describe("mapLocaleData", () => {

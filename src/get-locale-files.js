@@ -7,7 +7,7 @@ const {
 
 module.exports = (filesList, opts, logger) =>
   filesList
-    .map(mapContextData(opts.contextDelimiterKeys))
+    .map(mapContextData(opts.contextDelimiterKeys, opts.reservedContext))
     .filter(filterBlacklist(opts.ignoreFiles))
     .filter(
       filterWhitelistedContexts(

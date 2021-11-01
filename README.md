@@ -31,12 +31,13 @@ locale-keys lint -i ./content
 
 ## Options
 
-| Option                | Default               | Description                                                            |
-| --------------------- | --------------------- | ---------------------------------------------------------------------- |
-| defaultLocale         | en-US                 | Files without a locale suffixed in the name will default to this value |
-| contextDelimiterKeys  | :                     | How to specify contexts messages belong to                             |
-| contextDelimiterFiles | \_\_                  | How to specify contexts in the final output files                      |
-| localeRegionExp       | `/[a-z]{2}-[A-Z]{2}/` | The pattern to determine locale                                        |
-| keyMatchExp           | `/[\\w]+/`            | The style pattern contexts and message keys should enforce             |
-| ignoreFiles           | ['.DS_STORE']         | A list of files to be ignored by the parser                            |
-| filenameSuffix        |                       | A fixed string to apply at the end of the exported file                |
+| Option                | Default               | Description                                                                                                                                                                         |
+| --------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| defaultLocale         | en-US                 | Files without a locale suffixed in the name will default to this value                                                                                                              |
+| contextDelimiterKeys  | :                     | How to specify contexts messages belong to                                                                                                                                          |
+| contextDelimiterFiles | \_\_                  | How to specify contexts in the final output files                                                                                                                                   |
+| localeRegionExp       | `/[a-z]{2}-[A-Z]{2}/` | The pattern to determine locale                                                                                                                                                     |
+| keyMatchExp           | `/[\\w]+/`            | The style pattern contexts and message keys should enforce                                                                                                                          |
+| ignoreFiles           | ['.DS_STORE']         | A list of files to be ignored by the parser                                                                                                                                         |
+| filenameSuffix        |                       | A fixed string to apply at the end of the exported file                                                                                                                             |
+| reservedContext       | messages              | Files with this name will be rolled into the same context as their parent. For example, messages contained inside "some/feature/messages.json" will be namespaced as "some:feature" |
