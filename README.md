@@ -37,5 +37,6 @@ locale-keys lint -i ./content
 | contextDelimiterKeys  | :                     | How to specify contexts messages belong to                             |
 | contextDelimiterFiles | \_\_                  | How to specify contexts in the final output files                      |
 | localeRegionExp       | `/[a-z]{2}-[A-Z]{2}/` | The pattern to determine locale                                        |
-| nameMatchExp          | `/[\\w]+/`            | The style pattern contexts and message keys should enforce             |
-| ignoreFiles           | []                    | A list of files to be ignored by the parser                            |
+| keyMatchExp           | `/[\\w]+/`            | The style pattern contexts and message keys should enforce             |
+| ignoreFiles           | ['.DS_STORE']         | A list of files to be ignored by the parser                            |
+| filenameSuffix        |                       | A fixed string to apply at the end of the exported file                |

@@ -107,13 +107,13 @@ module.exports = {
   }),
   // Map context and locale data to a file path
   mapContextToFile:
-    (keyDelimiter, fileDelimiter) =>
+    (keyDelimiter, fileDelimiter, filenameSuffix = "") =>
     ([context, localeContents]) => ({
       localeContents: localeContents,
-      file: context.replace(
+      file: `${context.replace(
         new RegExp(`\\${keyDelimiter}`, "g"),
         fileDelimiter
-      ),
+      )}${filenameSuffix}`,
     }),
   // Write locale data to file
   writeLocalesToFile:

@@ -305,6 +305,15 @@ describe("utils", () => {
       );
     });
 
+    it("should support adding a suffix to a file", () => {
+      const map = mapContextToFile(":", "__", "+intl-icu");
+      expect(map(["test:feature"])).toEqual(
+        expect.objectContaining({
+          file: "test__feature+intl-icu",
+        })
+      );
+    });
+
     it("should pass locale content", () => {
       const map = mapContextToFile(":", "__");
       expect(

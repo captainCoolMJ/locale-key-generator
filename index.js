@@ -30,13 +30,19 @@ module.exports = {
   export: (opts = {}) => {
     opts = { ...defaultConfig, ...opts };
 
+    console.log(opts);
+
     if (!opts.dryRun && !fs.existsSync(path.resolve(opts.outputPath))) {
       fs.mkdirSync(path.resolve(opts.outputPath), { recursive: true });
     }
 
     buildContextsFromFs(opts, logger)
       .map(
-        mapContextToFile(opts.contextDelimiterKeys, opts.contextDelimiterFiles)
+        mapContextToFile(
+          opts.contextDelimiterKeys,
+          opts.contextDelimiterFiles,
+          opts.filenameSuffix
+        )
       )
       .map((file) => ({
         ...file,

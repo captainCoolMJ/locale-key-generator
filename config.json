@@ -5,6 +5,9 @@
   "contextDelimiterKeys": ":",
   "contextDelimiterFiles": "__",
   "localeRegionExp": "[a-z]{2}-[A-Z]{2}",
-  "keyMatchExp": "[a-z_]+",
-  "ignoreFiles": [".DS_Store"]
+  "keyMatchExp": "[\\w]+",
+  "ignoreFiles": [
+    ".DS_Store"
+  ],
+  "filenameSuffix": ""
 }
