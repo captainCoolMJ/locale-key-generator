@@ -97,6 +97,21 @@ module.exports = {
       return content;
     }, {}),
   }),
+  mapValues: (logger) => (file) => ({
+    ...file,
+    content: Object.entries(file.content).reduce((content, [key, value]) => {
+      if (typeof value === "string") {
+        content[key] = value;
+      } else if (typeof value === "object" && "value" in value) {
+        content[key] = value.value;
+      } else {
+        logger.warn(
+          `Unsupported Message Structure for Key: "${key}" found in ${file.path}`
+        );
+      }
+      return content;
+    }, {}),
+  }),
   // Prefix keys with the context they belong to
   prefixContextKeys: (delimiter) => (file) => ({
     ...file,

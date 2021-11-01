@@ -11,6 +11,7 @@ const {
   prefixContextKeys,
   mapContextToFile,
   writeLocalesToFile,
+  mapValues,
 } = require("./utils");
 const mockFile = require("../__mocks__/file.mock");
 const logger = require("../__mocks__/logger.mock");
@@ -270,6 +271,64 @@ describe("utils", () => {
       });
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'Invalid Message Key: "badKey" found in /test/feature.json'
+      );
+    });
+  });
+
+  describe("mapValues", () => {
+    it("should map string values to output", () => {
+      const map = mapValues(mockLogger);
+      expect(
+        map({
+          ...mockFile("/test/feature.json"),
+          content: {
+            goodkey: "Value",
+          },
+        })
+      ).toEqual(
+        expect.objectContaining({
+          content: {
+            goodkey: "Value",
+          },
+        })
+      );
+    });
+
+    it("should map objects with a 'value' key to output", () => {
+      const map = mapValues(mockLogger);
+      expect(
+        map({
+          ...mockFile("/test/feature.json"),
+          content: {
+            goodkey: {
+              value: "Value",
+              description: "A good value",
+            },
+          },
+        })
+      ).toEqual(
+        expect.objectContaining({
+          content: {
+            goodkey: "Value",
+          },
+        })
+      );
+    });
+
+    it('should log a warning if the value does not contain a "value" key', () => {
+      const map = mapValues(mockLogger);
+      map({
+        ...mockFile("/test/feature.json"),
+        content: {
+          badkey: {
+            valuee: "Value",
+            description: "A bad value",
+          },
+        },
+      });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Unsupported Message Structure for Key: "badkey" found in /test/feature.json'
       );
     });
   });

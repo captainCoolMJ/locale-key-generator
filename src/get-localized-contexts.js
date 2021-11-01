@@ -4,11 +4,13 @@ const {
   mapLocaleData,
   mergeContexts,
   mergeDefaultKeys,
+  mapValues,
 } = require("./utils");
 
 module.exports = (fileData, opts, logger) => {
   const localeData = fileData
     .map(dropInvalidKeys(logger, new RegExp(`^${opts.keyMatchExp}$`)))
+    .map(mapValues(logger))
     .map(prefixContextKeys(opts.contextDelimiterKeys))
     .map(
       mapLocaleData(

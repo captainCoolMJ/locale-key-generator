@@ -30,8 +30,6 @@ module.exports = {
   export: (opts = {}) => {
     opts = { ...defaultConfig, ...opts };
 
-    console.log(opts);
-
     if (!opts.dryRun && !fs.existsSync(path.resolve(opts.outputPath))) {
       fs.mkdirSync(path.resolve(opts.outputPath), { recursive: true });
     }
