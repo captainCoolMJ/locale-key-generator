@@ -7,7 +7,8 @@ const getLocaleFiles = require("./src/get-locale-files");
 const {
   traverse,
   mapContextToFile,
-  writeLocalesToFile,
+  formatToXliff,
+  formatToJson,
 } = require("./src/utils");
 
 const buildContextsFromFs = (opts, logger) =>
@@ -30,6 +31,22 @@ module.exports = {
   export: (opts = {}) => {
     opts = { ...defaultConfig, ...opts };
 
+    let outputFormatter;
+
+    switch (opts.outputFormat) {
+      case "json":
+        outputFormatter = formatToJson();
+        break;
+      case "xliff":
+        outputFormatter = formatToXliff(opts.defaultLocale);
+        break;
+    }
+
+    if (!outputFormatter) {
+      logger.error(`Invalid output format: ${opts.outputFormat}`);
+      throw new SyntaxError();
+    }
+
     if (!opts.dryRun && !fs.existsSync(path.resolve(opts.outputPath))) {
       fs.mkdirSync(path.resolve(opts.outputPath), { recursive: true });
     }
@@ -46,7 +63,16 @@ module.exports = {
         ...file,
         file: path.resolve(opts.outputPath, file.file),
       }))
-      .forEach(writeLocalesToFile(logger, opts.dryRun));
+      .map(outputFormatter)
+      .flat()
+      .forEach((file) => {
+        if (!opts.dryRun) {
+          fs.writeFileSync(file.path, file.content);
+        }
+        logger.info(
+          `${opts.dryRun ? "Would have written" : "Wrote"} "${file.path}"`
+        );
+      });
   },
   lint: (opts = {}) => {
     opts = { ...defaultConfig, ...opts };

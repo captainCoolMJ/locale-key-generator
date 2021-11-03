@@ -2,6 +2,7 @@
   "defaultLocale": "en-US",
   "inputPath": "./",
   "outputPath": "./output",
+  "outputFormat": "json",
   "contextDelimiterKeys": ":",
   "contextDelimiterFiles": "__",
   "localeRegionExp": "[a-z]{2}-[A-Z]{2}",

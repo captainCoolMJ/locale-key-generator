@@ -1,6 +1,12 @@
 const path = require("path");
 const fs = require("fs");
 
+const formatToJson = ({ file, localeContents }) =>
+  Object.entries(localeContents).map(([localeCode, contents]) => ({
+    path: `${file}.${localeCode}.json`,
+    content: JSON.stringify(contents, null, "\t"),
+  }));
+
 module.exports = {
   // Traverse a fs directory and return data about all the files inside it
   traverse: (basePath) => {
@@ -136,16 +142,36 @@ module.exports = {
         fileDelimiter
       )}${filenameSuffix}`,
     }),
-  // Write locale data to file
-  writeLocalesToFile:
-    (logger, dryRun) =>
-    ({ file, localeContents }) => {
-      Object.entries(localeContents).forEach(([locale, localeContents]) => {
-        const path = `${file}.${locale}.json`;
-        if (!dryRun) {
-          fs.writeFileSync(path, JSON.stringify(localeContents, null, "\t"));
-        }
-        logger.info(`${dryRun ? "Would have written" : "Wrote"} "${path}"`);
-      });
-    },
+  formatToXliff:
+    (defaultLocale) =>
+    ({ file, localeContents }) =>
+      Object.entries(localeContents).map(([localeCode, contents]) => {
+        const defaultStrings = localeContents[defaultLocale];
+        return {
+          path: `${file}.${localeCode}.xml`,
+          content: [
+            '<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">',
+            `<file source-language="${defaultLocale}" target-language="${localeCode}">`,
+            "<body>",
+            ...Object.entries(contents).map(([id, value]) =>
+              [
+                `\t<trans-unit id="${id}">`,
+                `\t\t<source>${defaultStrings[id]}</source>`,
+                `\t\t<target>${value}</target>`,
+                "\t</trans-unit>",
+              ].join("\n")
+            ),
+            "</body>",
+            "</file>",
+            "</xliff>",
+          ].join("\n"),
+        };
+      }),
+  formatToJson:
+    () =>
+    ({ file, localeContents }) =>
+      Object.entries(localeContents).map(([localeCode, contents]) => ({
+        path: `${file}.${localeCode}.json`,
+        content: JSON.stringify(contents, null, "\t"),
+      })),
 };

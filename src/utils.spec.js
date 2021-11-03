@@ -10,8 +10,10 @@ const {
   dropInvalidKeys,
   prefixContextKeys,
   mapContextToFile,
-  writeLocalesToFile,
   mapValues,
+  writeLocalesToXliff,
+  formatToJson,
+  formatToXliff,
 } = require("./utils");
 const mockFile = require("../__mocks__/file.mock");
 const logger = require("../__mocks__/logger.mock");
@@ -406,71 +408,75 @@ describe("utils", () => {
     });
   });
 
-  describe("writeLocalesToFile", () => {
-    beforeEach(() => {
-      jest.spyOn(fs, "writeFileSync").mockImplementation(() => undefined);
-    });
+  describe("formatToJson", () => {
+    it("should prepare a json file for each locale", () => {
+      const format = formatToJson();
 
-    afterEach(() => {
-      fs.writeFileSync.mockReset();
-    });
-
-    it("should write a locale file for each one passed in", () => {
-      const write = writeLocalesToFile(mockLogger);
-
-      write({
+      const result = format({
         file: "testfile",
         localeContents: {
           "en-US": { "testfile:key": "value" },
-          "de-DE": { "testfile:key": "value" },
+          "de-DE": { "testfile:key": "wert" },
         },
       });
 
-      expect(fs.writeFileSync).toHaveBeenCalledTimes(2);
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        "testfile.en-US.json",
-        JSON.stringify({ "testfile:key": "value" }, null, "\t")
-      );
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        "testfile.de-DE.json",
-        JSON.stringify({ "testfile:key": "value" }, null, "\t")
-      );
+      expect(result).toEqual([
+        {
+          path: "testfile.en-US.json",
+          content: JSON.stringify({ "testfile:key": "value" }, null, "\t"),
+        },
+        {
+          path: "testfile.de-DE.json",
+          content: JSON.stringify({ "testfile:key": "wert" }, null, "\t"),
+        },
+      ]);
     });
+  });
 
-    it("should log the file path to the console", () => {
-      const write = writeLocalesToFile(mockLogger);
+  describe("formatToXliff", () => {
+    it("should prepare an xliff file for each locale", () => {
+      const format = formatToXliff("en-US");
 
-      write({
+      const result = format({
         file: "testfile",
         localeContents: {
           "en-US": { "testfile:key": "value" },
-          "de-DE": { "testfile:key": "value" },
+          "de-DE": { "testfile:key": "wert" },
         },
       });
 
-      expect(mockLogger.info).toHaveBeenCalledTimes(2);
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'Wrote "testfile.en-US.json"'
-      );
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'Wrote "testfile.de-DE.json"'
-      );
-    });
-
-    describe("dry run", () => {
-      it("should not call fs.writeFileSync", () => {
-        const write = writeLocalesToFile(mockLogger, true);
-
-        write({
-          file: "testfile",
-          localeContents: {
-            "en-US": { "testfile:key": "value" },
-            "de-DE": { "testfile:key": "value" },
-          },
-        });
-
-        expect(fs.writeFileSync).not.toHaveBeenCalled();
-      });
+      expect(result).toEqual([
+        {
+          path: "testfile.en-US.xml",
+          content: [
+            '<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">',
+            `<file source-language="en-US" target-language="en-US">`,
+            "<body>",
+            `\t<trans-unit id="testfile:key">`,
+            `\t\t<source>value</source>`,
+            `\t\t<target>value</target>`,
+            "\t</trans-unit>",
+            "</body>",
+            "</file>",
+            "</xliff>",
+          ].join("\n"),
+        },
+        {
+          path: "testfile.de-DE.xml",
+          content: [
+            '<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">',
+            `<file source-language="en-US" target-language="de-DE">`,
+            "<body>",
+            `\t<trans-unit id="testfile:key">`,
+            `\t\t<source>value</source>`,
+            `\t\t<target>wert</target>`,
+            "\t</trans-unit>",
+            "</body>",
+            "</file>",
+            "</xliff>",
+          ].join("\n"),
+        },
+      ]);
     });
   });
 });

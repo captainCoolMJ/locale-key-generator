@@ -11,6 +11,7 @@ const argMap = {
   i: "inputPath",
   o: "outputPath",
   contexts: "contexts",
+  ["output-format"]: "outputFormat",
   ["filename-suffix"]: "filenameSuffix",
 };
 
