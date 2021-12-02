@@ -38,7 +38,7 @@ module.exports = {
         outputFormatter = formatToJson();
         break;
       case "xliff":
-        outputFormatter = formatToXliff(opts.defaultLocale);
+        outputFormatter = formatToXliff(opts.baseLanguage);
         break;
     }
 

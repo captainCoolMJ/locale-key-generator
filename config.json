@@ -1,11 +1,11 @@
 {
-  "defaultLocale": "en-US",
+  "baseLanguage": "en_US",
   "inputPath": "./",
   "outputPath": "./output",
   "outputFormat": "json",
   "contextDelimiterKeys": ":",
   "contextDelimiterFiles": "__",
-  "localeRegionExp": "[a-z]{2}-[A-Z]{2}",
+  "localeRegionExp": "[a-z]{2}_[A-Z]{2}",
   "keyMatchExp": "[\\w]+",
   "ignoreFiles": [
     ".DS_Store"

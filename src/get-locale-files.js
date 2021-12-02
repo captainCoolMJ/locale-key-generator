@@ -18,6 +18,8 @@ module.exports = (filesList, opts, logger) =>
     .filter(
       filterMatchingFiles(
         logger,
-        new RegExp(`^${opts.keyMatchExp}(\.${opts.localeRegionExp})?(\.json)?$`)
+        opts.keyMatchExp,
+        opts.localeRegionExp,
+        "json"
       )
     );

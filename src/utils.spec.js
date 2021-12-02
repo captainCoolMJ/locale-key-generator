@@ -49,18 +49,31 @@ describe("utils", () => {
   });
 
   describe("filterMatchingFiles", () => {
-    it("should return false if any part of the file path does not match the given expression", () => {
-      const filter = filterMatchingFiles(mockLogger, /^[a-z]+(\.json)?$/);
-      expect(filter(mockFile("/BadDir/somefile.json"))).toBeFalsy();
-      expect(filter(mockFile("/dir/SomeFile.json"))).toBeFalsy();
-      expect(filter(mockFile("/dir/somefile.json"))).toBeTruthy();
+    it("should return false if any part of the file path does not match the pattern for locale filess", () => {
+      const filter = filterMatchingFiles(mockLogger, "[a-z]+", "en_US", "json");
+      expect(filter(mockFile("/dir/somefile.en_US.json"))).toBeTruthy();
+      expect(filter(mockFile("/BadDir/somefile.en_US.json"))).toBeFalsy();
+      expect(filter(mockFile("/dir/SomeFile.en_US.json"))).toBeFalsy();
+      expect(filter(mockFile("/dir/somefile.json"))).toBeFalsy();
+    });
+
+    it("should log a warning if the locale does not match the required pattern", () => {
+      const filter = filterMatchingFiles(mockLogger, "[a-z]+", "en_US", "json");
+      filter(mockFile("/BadDir/somefile.en-US.json"));
+      filter(mockFile("/BadDir/somefile.json"));
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Invalid Locale: "BadDir/somefile.en-US.json" is not a valid locale'
+      );
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Invalid Locale: "BadDir/somefile.json" is not a valid locale'
+      );
     });
 
     it("should log a warning if a file does not match", () => {
-      const filter = filterMatchingFiles(mockLogger, /^[a-z]+(\.json)?$/);
-      filter(mockFile("/BadDir/somefile.json"));
+      const filter = filterMatchingFiles(mockLogger, "[a-z]+", "en_US", "json");
+      filter(mockFile("/BadDir/somefile.en_US.json"));
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        'Invalid Name: "BadDir/somefile.json" is not valid'
+        'Invalid File: "BadDir/somefile.en_US.json" is not a valid file pattern'
       );
     });
   });
@@ -91,13 +104,6 @@ describe("utils", () => {
     it("should determine a locale based on the file name and matcher", () => {
       const map = mapLocaleData(/^[a-z]+\.([a-z]{2}-[A-Z]{2})\.json$/);
       expect(map(mockFile("feature.en-US.json"))).toEqual(
-        expect.objectContaining({ locale: "en-US" })
-      );
-    });
-
-    it("should set a default locale if one is not supplied", () => {
-      const map = mapLocaleData(/^[a-z]+\.([a-z]{2}-[A-Z]{2})\.json$/, "en-US");
-      expect(map(mockFile("feature.json"))).toEqual(
         expect.objectContaining({ locale: "en-US" })
       );
     });

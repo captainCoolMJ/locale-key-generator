@@ -37,13 +37,29 @@ module.exports = {
       !blacklist.includes(file),
   // Ensure only matching locale files get processed and log a warning if there are non matches
   filterMatchingFiles:
-    (logger, matcher) =>
-    ({ parts }) => {
-      if (parts.some((part) => !matcher.test(part))) {
-        logger.warn(`Invalid Name: "${parts.join("/")}" is not valid`);
-        return false;
+    (logger, keyMatchExp, localeRegionExp, fileTypeExp) =>
+    ({ parts, file }) => {
+      let isValid = true;
+
+      if (!new RegExp(`${localeRegionExp}\.${fileTypeExp}$`).test(file)) {
+        isValid = false;
+        logger.warn(
+          `Invalid Locale: "${parts.join("/")}" is not a valid locale`
+        );
       }
-      return true;
+
+      if (
+        parts.some(
+          (part) => !new RegExp(`^${keyMatchExp}$`).test(part.split(".")[0])
+        )
+      ) {
+        logger.warn(
+          `Invalid File: "${parts.join("/")}" is not a valid file pattern`
+        );
+        isValid = false;
+      }
+
+      return isValid;
     },
   // Attach context data
   mapContextData: (delimiter, reservedContextFilename) => (file) => {
@@ -61,9 +77,9 @@ module.exports = {
     };
   },
   // Attach locale data
-  mapLocaleData: (matcher, defaultLocale) => (file) => ({
+  mapLocaleData: (matcher) => (file) => ({
     ...file,
-    locale: file.file.match(matcher)?.[1] || defaultLocale,
+    locale: file.file.match(matcher)?.[1],
   }),
   // Apply the contents of a file to each locale and context it applies to
   mergeContexts: (delimiter) => (contexts, file) => {
@@ -78,11 +94,11 @@ module.exports = {
     return contexts;
   },
   // Ensure all locales have the same keys as the default
-  mergeDefaultKeys: (defaultLocale) => (context) => {
+  mergeDefaultKeys: (baseLanguage) => (context) => {
     const [, locales] = context;
     Object.entries(locales).forEach(([locale, contents]) => {
       locales[locale] = {
-        ...locales[defaultLocale],
+        ...locales[baseLanguage],
         ...contents,
       };
     });
@@ -143,15 +159,15 @@ module.exports = {
       )}${filenameSuffix}`,
     }),
   formatToXliff:
-    (defaultLocale) =>
+    (baseLanguage) =>
     ({ file, localeContents }) =>
       Object.entries(localeContents).map(([localeCode, contents]) => {
-        const defaultStrings = localeContents[defaultLocale];
+        const defaultStrings = localeContents[baseLanguage];
         return {
           path: `${file}.${localeCode}.xml`,
           content: [
             '<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">',
-            `<file source-language="${defaultLocale}" target-language="${localeCode}">`,
+            `<file source-language="${baseLanguage}" target-language="${localeCode}">`,
             "<body>",
             ...Object.entries(contents).map(([id, value]) =>
               [
