@@ -26,7 +26,7 @@ const buildContextsFromFs = (opts, logger) =>
     opts,
     logger
   ).filter(([key, locales]) => {
-    return !!locales[opts.defaultLocale];
+    return !!locales[opts.baseLanguage];
   });
 
 module.exports = {
@@ -40,7 +40,7 @@ module.exports = {
         outputFormatter = formatToJson();
         break;
       case "xliff":
-        outputFormatter = formatToXliff(opts.defaultLocale);
+        outputFormatter = formatToXliff(opts.baseLanguage);
         break;
     }
 

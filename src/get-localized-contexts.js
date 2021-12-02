@@ -21,11 +21,11 @@ module.exports = (fileData, opts, logger) => {
     .forEach(([key, locales]) => {
       Object.entries(locales).forEach(([localeId, messages]) => {
         if (
-          localeId !== opts.defaultLocale &&
-          localeData[key][opts.defaultLocale]
+          localeId !== opts.baseLanguage &&
+          localeData[key][opts.baseLanguage]
         ) {
           Object.keys(messages).forEach((messageId) => {
-            if (!(messageId in localeData[key][opts.defaultLocale])) {
+            if (!(messageId in localeData[key][opts.baseLanguage])) {
               logger.warn(
                 `Extra Keys: ${messageId} found in ${localeId} but not in the default language`
               );
@@ -37,11 +37,11 @@ module.exports = (fileData, opts, logger) => {
 
   return Object.entries(localeData)
     .filter(([key, locales]) => {
-      if (!locales[opts.defaultLocale]) {
+      if (!locales[opts.baseLanguage]) {
         logger.warn(`Could not find default locale contents for ${key}.`);
         return false;
       }
       return true;
     })
-    .map(mergeDefaultKeys(opts.defaultLocale));
+    .map(mergeDefaultKeys(opts.baseLanguage));
 };

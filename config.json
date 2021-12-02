@@ -1,5 +1,5 @@
 {
-  "defaultLocale": "en-US",
+  "baseLanguage": "en-US",
   "inputPath": "./",
   "outputPath": "./output",
   "outputFormat": "json",

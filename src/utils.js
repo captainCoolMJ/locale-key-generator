@@ -94,11 +94,11 @@ module.exports = {
     return contexts;
   },
   // Ensure all locales have the same keys as the default
-  mergeDefaultKeys: (defaultLocale) => (context) => {
+  mergeDefaultKeys: (baseLanguage) => (context) => {
     const [, locales] = context;
     Object.entries(locales).forEach(([locale, contents]) => {
       locales[locale] = {
-        ...locales[defaultLocale],
+        ...locales[baseLanguage],
         ...contents,
       };
     });
@@ -159,15 +159,15 @@ module.exports = {
       )}${filenameSuffix}`,
     }),
   formatToXliff:
-    (defaultLocale) =>
+    (baseLanguage) =>
     ({ file, localeContents }) =>
       Object.entries(localeContents).map(([localeCode, contents]) => {
-        const defaultStrings = localeContents[defaultLocale];
+        const defaultStrings = localeContents[baseLanguage];
         return {
           path: `${file}.${localeCode}.xml`,
           content: [
             '<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">',
-            `<file source-language="${defaultLocale}" target-language="${localeCode}">`,
+            `<file source-language="${baseLanguage}" target-language="${localeCode}">`,
             "<body>",
             ...Object.entries(contents).map(([id, value]) =>
               [
