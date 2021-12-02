@@ -25,7 +25,9 @@ const buildContextsFromFs = (opts, logger) =>
       })),
     opts,
     logger
-  );
+  ).filter(([key, locales]) => {
+    return !!locales[opts.defaultLocale];
+  });
 
 module.exports = {
   export: (opts = {}) => {

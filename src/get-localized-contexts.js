@@ -12,20 +12,18 @@ module.exports = (fileData, opts, logger) => {
     .map(dropInvalidKeys(logger, new RegExp(`^${opts.keyMatchExp}$`)))
     .map(mapValues(logger))
     .map(prefixContextKeys(opts.contextDelimiterKeys))
-    .map(
-      mapLocaleData(
-        new RegExp(`\.(${opts.localeRegionExp})\.json$`),
-        opts.defaultLocale
-      )
-    )
+    .map(mapLocaleData(new RegExp(`\.(${opts.localeRegionExp})\.json$`)))
     .reduce(mergeContexts(opts.contextDelimiterKeys), {});
 
-  // Check for extra keys from the top level contexts
+  // Check for extra keys and invalid locales from the top level contexts
   Object.entries(localeData)
     .filter(([key]) => key.split(opts.contextDelimiterKeys).length === 1)
     .forEach(([key, locales]) => {
       Object.entries(locales).forEach(([localeId, messages]) => {
-        if (localeId !== opts.defaultLocale) {
+        if (
+          localeId !== opts.defaultLocale &&
+          localeData[key][opts.defaultLocale]
+        ) {
           Object.keys(messages).forEach((messageId) => {
             if (!(messageId in localeData[key][opts.defaultLocale])) {
               logger.warn(
@@ -37,5 +35,13 @@ module.exports = (fileData, opts, logger) => {
       });
     });
 
-  return Object.entries(localeData).map(mergeDefaultKeys(opts.defaultLocale));
+  return Object.entries(localeData)
+    .filter(([key, locales]) => {
+      if (!locales[opts.defaultLocale]) {
+        logger.warn(`Could not find default locale contents for ${key}.`);
+        return false;
+      }
+      return true;
+    })
+    .map(mergeDefaultKeys(opts.defaultLocale));
 };
