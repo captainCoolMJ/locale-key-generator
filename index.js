@@ -9,6 +9,7 @@ const {
   mapContextToFile,
   formatToXliff,
   formatToJson,
+  isIndentValid,
 } = require("./src/utils");
 
 const buildContextsFromFs = (opts, logger) =>
@@ -19,10 +20,24 @@ const buildContextsFromFs = (opts, logger) =>
       logger
     )
       .filter(({ file }) => file.endsWith(".json"))
-      .map((file) => ({
-        ...file,
-        content: JSON.parse(fs.readFileSync(file.path, { encoding: "utf-8" })),
-      })),
+      .map((file) => {
+        const rawContents = fs.readFileSync(file.path, { encoding: "utf-8" });
+        if (
+          !isIndentValid(rawContents, {
+            indent: opts.indent,
+          })
+        ) {
+          logger.warn(
+            `Invalid Indent: "${file.parts.join(
+              "/"
+            )}" contains invalid indentation.`
+          );
+        }
+        return {
+          ...file,
+          content: JSON.parse(rawContents),
+        };
+      }),
     opts,
     logger
   );

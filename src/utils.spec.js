@@ -14,6 +14,7 @@ const {
   writeLocalesToXliff,
   formatToJson,
   formatToXliff,
+  isIndentValid,
 } = require("./utils");
 const mockFile = require("../__mocks__/file.mock");
 const logger = require("../__mocks__/logger.mock");
@@ -75,6 +76,51 @@ describe("utils", () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'Invalid File: "BadDir/somefile.en_US.json" is not a valid file pattern'
       );
+    });
+  });
+
+  describe("isIndentValid", () => {
+    it("should return true if a text file contains the configured indentation style", () => {
+      expect(
+        isIndentValid(
+          `
+{
+  "test": "key"
+}
+`,
+          {
+            indent: 2,
+          }
+        )
+      ).toBeTruthy();
+    });
+
+    it('should return false if "tab" is configured but the file does not contain tab', () => {
+      expect(
+        isIndentValid(
+          `
+{
+  "test": "key",
+\t"another": "key"
+}
+      `,
+          { indent: "tab" }
+        )
+      ).toBeFalsy();
+    });
+
+    it("should return false if the number of spaces is not the same as the configured one", () => {
+      expect(
+        isIndentValid(
+          `
+{
+  "test": "key",
+  "another": "key"
+}
+      `,
+          { indent: 4 }
+        )
+      ).toBeFalsy();
     });
   });
 
