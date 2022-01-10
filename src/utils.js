@@ -1,12 +1,6 @@
 const path = require("path");
 const fs = require("fs");
 
-const formatToJson = ({ file, localeContents }) =>
-  Object.entries(localeContents).map(([localeCode, contents]) => ({
-    path: `${file}.${localeCode}.json`,
-    content: JSON.stringify(contents, null, "\t"),
-  }));
-
 module.exports = {
   // Traverse a fs directory and return data about all the files inside it
   traverse: (basePath) => {
@@ -61,6 +55,23 @@ module.exports = {
 
       return isValid;
     },
+  // Validate that every line of a file is consistent with a configured indentation style
+  isIndentValid: (fileContents, { indent }) => {
+    let matcher;
+    if (!isNaN(indent)) {
+      matcher = ` {${indent}}`;
+    } else if (indent === "tab") {
+      matcher = "\t";
+    }
+
+    matcher = new RegExp(`^${matcher}"`);
+
+    return !fileContents
+      .split("\n")
+      .some((line) =>
+        !/^\s+"/.test(line) || matcher.test(line) ? false : true
+      );
+  },
   // Attach context data
   mapContextData: (delimiter, reservedContextFilename) => (file) => {
     const parts = file.parts.map((part) => part.split(".")[0]);

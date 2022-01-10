@@ -10,6 +10,7 @@
   "ignoreFiles": [
     ".DS_Store"
   ],
+  "indent": 2,
   "filenameSuffix": "",
   "reservedContext": "messages"
 }
