@@ -22,15 +22,8 @@ const buildContextsFromFs = (opts, logger) =>
       .filter(({ file }) => file.endsWith(".json"))
       .map((file) => {
         const rawContents = fs.readFileSync(file.path, { encoding: "utf-8" });
-        return {
-          ...file,
-          rawContents,
-          content: JSON.parse(rawContents),
-        };
-      })
-      .map((file) => {
         if (
-          !isIndentValid(file.rawContents, {
+          !isIndentValid(rawContents, {
             indent: opts.indent,
           })
         ) {
@@ -40,8 +33,10 @@ const buildContextsFromFs = (opts, logger) =>
             )}" contains invalid indentation.`
           );
         }
-
-        return file;
+        return {
+          ...file,
+          content: JSON.parse(rawContents),
+        };
       }),
     opts,
     logger
