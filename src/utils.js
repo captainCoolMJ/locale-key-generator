@@ -183,7 +183,7 @@ module.exports = {
             ...Object.entries(contents).map(([id, value]) =>
               [
                 `\t<trans-unit id="${id}">`,
-                `\t\t<source>${defaultStrings[id]}</source>`,
+                `\t\t<source>${id}</source>`,
                 `\t\t<target>${value}</target>`,
                 "\t</trans-unit>",
               ].join("\n")
